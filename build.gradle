@@ -1,5 +1,6 @@
 plugins {
   id 'java'
+  id 'jacoco'
   id 'checkstyle'
   id 'org.springframework.boot' version '4.0.1'
   id 'io.spring.dependency-management' version '1.1.7'
@@ -70,6 +71,24 @@ checkstyle {
 checkstyleNohttp {
   configDirectory = project.file('src/checkstyle')
   configFile = file('src/checkstyle/nohttp-checkstyle.xml')
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
 }
 
 tasks.named("formatMain").configure { dependsOn("checkstyleMain") }
