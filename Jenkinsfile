@@ -2,38 +2,35 @@ pipeline {
     agent any
 
     triggers {
-        // Every 5 minutes on Mondays
         cron('H/5 * * * 1')
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                bat 'mvnw.cmd -B clean test package'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
+                bat 'gradlew clean build'
             }
         }
 
-        stage('JaCoCo Coverage') {
+        stage('Test Coverage') {
             steps {
-                bat 'mvnw.cmd -B jacoco:report'
+                bat 'gradlew jacocoTestReport'
             }
         }
+    }
 
-        stage('Archive Artifact') {
-            steps {
-                archiveArtifacts artifacts: 'target/*.jar,target/*.war', fingerprint: true
-            }
+    post {
+        always {
+            jacoco execPattern: '**/build/jacoco/test.exec',
+                   classPattern: '**/classes',
+                   sourcePattern: '**/src/main/java'
         }
     }
 }
