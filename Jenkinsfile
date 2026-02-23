@@ -2,35 +2,27 @@ pipeline {
     agent any
 
     triggers {
+        // every 5 minutes on Mondays
         cron('H/5 * * * 1')
     }
 
     stages {
-
         stage('Checkout') {
-            steps {
-                checkout scm
-            }
+            steps { checkout scm }
         }
 
         stage('Build') {
-            steps {
-                bat 'gradlew clean build'
-            }
+            steps { bat 'gradlew.bat clean build' }
         }
 
-        stage('Test Coverage') {
-            steps {
-                bat 'gradlew jacocoTestReport'
-            }
+        stage('Test Coverage (JaCoCo)') {
+            steps { bat 'gradlew.bat test jacocoTestReport' }
         }
     }
 
     post {
         always {
-            jacoco execPattern: '**/build/jacoco/test.exec',
-                   classPattern: '**/classes',
-                   sourcePattern: '**/src/main/java'
+            archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
         }
     }
 }
